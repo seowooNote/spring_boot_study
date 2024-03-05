@@ -9,6 +9,8 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,13 +20,19 @@ public class StudentController {
 
     // JSON 일때
     @PostMapping("/student")
-    public ResponseEntity<?> addStudent(@CookieValue(required = false) String students, @RequestBody Student student) throws JsonProcessingException { // @RequestBody POST 요청시 매개변수에 달아야 함!!!(단 JSON만 됨) JSON이 아닐경우 없애고 그냥 쓰면 됨
+    public ResponseEntity<?> addStudent(@CookieValue(required = false) String students, @RequestBody Student student) throws JsonProcessingException, UnsupportedEncodingException {
+        ObjectMapper objectMapper = new ObjectMapper();
         List<Student> studentList = new ArrayList<>();
         int lastId = 0;
+
+        System.out.println(students);
+
         if(students != null) {
             if(!students.isBlank()) {
-                ObjectMapper studentsCookie = new ObjectMapper();
-                studentList = studentsCookie.readValue(students, List.class);
+                for(Object object : objectMapper.readValue(students, List.class)) { // readValue() JSON -> List
+                    Map<String, Object> studentMap = (Map<String, Object>) object; // Object 를 Map 으로 다운캐스팅
+                    studentList.add(objectMapper.convertValue(studentMap, Student.class)); // convertValue() Map -> student 객체
+                }
                 lastId = studentList.get(studentList.size() - 1).getStudentId();
             }
         }
@@ -32,15 +40,20 @@ public class StudentController {
         student.setStudentId(lastId + 1);
         studentList.add(student);
 
-        ObjectMapper newStudentList = new ObjectMapper();
-        String newStudents = newStudentList.writeValueAsString(studentList);
+        String studentsListJson = objectMapper.writeValueAsString(studentList); // toJson() JSON으로 바꾸기
+
+        System.out.println(studentsListJson);
+        // 쿠키 객체 만들기
         ResponseCookie responseCookie = ResponseCookie
-                .from("students", newStudents)
+                .from("students", URLEncoder.encode(studentsListJson, "UTF-8")) // "students" 쿠키의 키 값, 이때 "students"는 postMapping(@CookieValue 의 해당 변수와 이름이 동일해야함!!!)
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
                 .maxAge(60)
                 .build();
+
+        // (")문자 저장x
+
         return ResponseEntity
                 .created(null)
                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
