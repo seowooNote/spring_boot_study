@@ -11,19 +11,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class StudentRestController {
-    @Autowired
-    @Qualifier("studentServiceImpl")
-    private StudentServiceImpl studentServiceImpl;
-
-    @GetMapping("/ex/students")
-    public ResponseEntity<?> students() {
-        return ResponseEntity.ok(studentServiceImpl.getStudentList());
-    }
-
-    @GetMapping("/ex/student/{index}")
-    public ResponseEntity<?> student(@PathVariable int index) {
-        return ResponseEntity.ok(studentServiceImpl.getStudent(index));
-    }
+//    @Autowired
+//    @Qualifier("studentServiceImpl")
+//    private StudentServiceImpl studentServiceImpl;
+//
+//    @GetMapping("/ex/students")
+//    public ResponseEntity<?> students() {
+//        return ResponseEntity.ok(studentServiceImpl.getStudentList());
+//    }
+//
+//    @GetMapping("/ex/student/{index}")
+//    public ResponseEntity<?> student(@PathVariable int index) {
+//        return ResponseEntity.ok(studentServiceImpl.getStudent(index));
+//    }
 
 //    @Autowired
 //    @Qualifier("studentServiceImpl")

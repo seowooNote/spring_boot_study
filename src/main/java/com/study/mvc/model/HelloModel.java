@@ -1,3 +1,4 @@
+
 package com.study.mvc.model;
 
 import lombok.Builder;
